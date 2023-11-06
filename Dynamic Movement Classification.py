@@ -1,13 +1,17 @@
-import cv2
-import mediapipe as mp
+import mediapipe as mp  # Import mediapipe
+import cv2  # Import opencv
 from dollarpy import Recognizer, Template, Point
+# import csv
+import os
+import numpy as np
 import matplotlib.pyplot as plt
 
-mp_drawing = mp.solutions.drawing_utils
-mp_holistic = mp.solutions.holistic
-templates = []
+mp_drawing = mp.solutions.drawing_utils  # Drawing helpers
+mp_holistic = mp.solutions.holistic  # Mediapipe Solutions
 
-# Function to capture video and get skeleton points
+templates = []  # list of templates for $1 training
+
+
 def getPoints(videoURL, label):
     cap = cv2.VideoCapture(videoURL)  # web cam =0 , else enter filename
     # Initiate holistic model
@@ -185,47 +189,19 @@ def getPoints(videoURL, label):
     return points
 
 
-# Function to capture video from the camera and get skeleton points
-def capture_and_recognize_gesture(recognizer, label):
-    cap = cv2.VideoCapture(0)  # 0 corresponds to the default camera
+# #Hello correct
+# vid = "C:\\Users\\mahmo\\Downloads\\Video\\how-to-sign-hello-in-asl-american-sign-language_BRBLHCqI.mp4"
+# points = getPoints(vid,"Hello")
+# tmpl_2 = Template('Hello', points)
+# templates.append(tmpl_2)
 
-    with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-        points = []  # Initialize an empty list to store points
-        while cap.isOpened():
-            ret, frame = cap.read()
 
-            if not ret:
-                continue
+# print(templates)
 
-            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image.flags.writeable = False
-            results = holistic.process(image)
 
-            if results.pose_landmarks:
-                pose = results.pose_landmarks.landmark
-                newlist = []
-
-                for landmark in pose:
-                    if landmark in [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 23, 24]:
-                        newlist.append(landmark)
-
-                points.extend(newlist)
-
-            cv2.imshow(label, frame)
-
-            if cv2.waitKey(10) & 0xFF == ord('q'):
-                break
-
-    cap.release()
-    cv2.destroyAllWindows()
-
-    # Recognize the captured gesture
-    result = recognizer.recognize(points)
-
-    print("Recognized Gesture: ", result)
 # Load video and record "Hello" gesture
-vid_hello = r"D:\HCI\Hello.mp4"  # Replace with the path to the "Hello" video
-points_hello = getPoints(vid_hello, "Hello")
+vid_say_hello = r"D:\HCI\Hello.mp4"  # Replace with the path to the video where you say "Hello"
+points_hello = getPoints(vid_say_hello, "Hello")
 tmpl_hello = Template('Hello', points_hello)
 templates.append(tmpl_hello)
 
@@ -238,13 +214,9 @@ templates.append(tmpl_no_hello)
 # Create a recognizer and use it to classify gestures
 recognizer = Recognizer(templates)
 
-# # Load the video in which you say "Hello" and recognize the gesture
-# vid_say_hello = "path_to_say_hello_video.mp4"  # Replace with the path to the video where you say "Hello"
-# points_say_hello = getPoints(vid_say_hello, "Say Hello")
-# result = recognizer.recognize(points_say_hello)
-#
-# print("Recognized Gesture: ", result)
+# Load the video in which you say "Hello" and recognize the gesture
+vid_say_hello = r"D:\HCI\Hello.mp4"  # Replace with the path to the video where you say "Hello"
+points_say_hello = getPoints(vid_say_hello, "Correct Hello")
+result = recognizer.recognize(points_say_hello)
 
-
-# Capture video from the camera and recognize gestures
-capture_and_recognize_gesture(recognizer, "Test Gesture")
+print("Recognized Gesture: ", result)
